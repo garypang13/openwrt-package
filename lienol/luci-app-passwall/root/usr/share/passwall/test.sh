@@ -67,17 +67,12 @@ test_auto_switch() {
 	fi
 
 	status=$(test_proxy)
-	if [ "$status" == 0 ]; then
-		echolog "自动切换检测：${type}_${index}节点正常。"
-		return 0
-	elif [ "$status" == 2 ]; then
+	if [ "$status" == 2 ]; then
 		echolog "自动切换检测：无法连接到网络，请检查网络是否正常！"
 		return 2
-	elif [ "$status" == 1 ]; then
-		echolog "自动切换检测：${type}_${index}节点异常，开始切换节点！"
-		
+	else
 		#检测主节点是否能使用
-		local main_node=$(config_t_get auto_switch tcp_main1)
+		local main_node=$(config_t_get global tcp_node1)
 		if [ "$now_node" != "$main_node" ]; then
 			local node_type=$(echo $(config_n_get $main_node type) | tr 'A-Z' 'a-z')
 			if [ "$node_type" == "socks" ]; then
@@ -97,6 +92,10 @@ test_auto_switch() {
 				/usr/share/passwall/app.sh node_switch $type $2 $index $main_node
 				return 0
 			fi
+		fi
+		if [ "$status" == 0 ]; then
+			echolog "自动切换检测：${type}_${index}节点正常。"
+			return 0
 		fi
 		
 		local new_node
